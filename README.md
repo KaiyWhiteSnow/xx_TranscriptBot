@@ -18,7 +18,15 @@ Features
 ```
 pip install -r requirements.txt
 ```
+### Create .env
 
+In root create .env with following fields
+
+```
+eternal_prefix = "" // Deffault prefix is set as "!"
+eternal_token = "" // Your token
+
+```
 Make sure to have the necessary permissions to run the bot on your Discord server.
 Modify the head.py file to customize the HTML head content if needed.
 Run the bot using the following command:
