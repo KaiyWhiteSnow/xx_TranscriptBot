@@ -23,7 +23,7 @@ Make sure to have the necessary permissions to run the bot on your Discord serve
 Modify the head.py file to customize the HTML head content if needed.
 Run the bot using the following command:
 
-run
+### run
 
 ```
 python3 -m /src/
