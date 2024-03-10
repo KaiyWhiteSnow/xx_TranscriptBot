@@ -34,7 +34,7 @@ Run the bot using the following command:
 ### run
 
 ```
-python3 -m /src/
+python3 -m src
 ```
 
 ### Commands
