@@ -166,4 +166,5 @@ cython_debug/
 src.svg
 
 # xx transcript bot
-/src/config/
+*.html
+.env

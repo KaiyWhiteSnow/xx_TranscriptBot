@@ -44,7 +44,7 @@ async def on_ready():
     logger.info("We have logged in as %s", bot.user.name)
     await bot.change_presence(
         activity=discord.Activity(
-            type=discord.ActivityType.watching, name=f"over Eternalister"
+            type=discord.ActivityType.watching, name=f"over xx Public Discord"
         )
     )
     logger.info("Ready!")
