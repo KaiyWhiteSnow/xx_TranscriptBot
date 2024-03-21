@@ -10,14 +10,16 @@ from .config.discord_config import BOT_PREFIX
 # Configure loggers - This must run before SQLAlchemy is initialized
 logger_config.configure_logger(
     [
-        "Eternal.Main",
+        "Bot.Main",
         "discord",
         "discord.http",
+        "Bot.Transcript"
     ]
 )
 
 
-logger: logging.Logger = logging.getLogger("Eternal.Main")
+logger: logging.Logger = logging.getLogger("Bot.Main")
+transcript_logger = logging.getLogger("Bot.Transcript")
 
 # Setup bot instance
 intents: discord.Intents = discord.Intents.all()
