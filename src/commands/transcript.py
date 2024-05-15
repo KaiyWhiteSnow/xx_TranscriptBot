@@ -19,7 +19,22 @@ class Transcripts(commands.Cog):
         Returns:
             str: The escaped text.
         """
-        return discord.utils.escape_markdown(discord.utils.escape_mentions(text))
+        
+        # f"https://cdn.discordapp.com/emojis/%7Bemoji_id%7D.webp?size=96&quality=lossless"
+        
+        
+        
+        text = discord.utils.escape_markdown(discord.utils.escape_mentions(text))
+        text = text.replace('**', '<strong>').replace('**', '</strong>')
+        text = text.replace(r'\*\*', '<strong>').replace(r'\*\*', '</strong>')
+        text = text.replace(r'\_\_', '')
+        text = text.replace(r'\`\`\`', '')
+        text = text.replace('__', '<br>')
+        text = text.replace(r'\> ', '<br>')
+        text = text.replace('```', '')
+        return text
+
+
 
     def escape_attachments(self, attachments):
         """
