@@ -1,3 +1,5 @@
+import requests
+from typing import Tuple, List, Dict
 import discord
 from discord.ext import commands
 import os
@@ -8,6 +10,92 @@ class Transcripts(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.out_dir = os.path.join(os.path.dirname(__file__), 'out')            
+
+    def parse_emoji(self, emoji_id: str):
+        return f"https://cdn.discordapp.com/emojis/{emoji_id}.webp?size=128&quality=lossless"
+
+    def next_emoji(self,message: str, startIndex: int) -> Tuple[int, int]:
+        """
+        Returns start and end index of the nearest emoji ID
+        Raises IndexError if invalid tag.
+        """
+        if startIndex != 0:
+            startIndex += 1
+        emoji = message[startIndex:].split("<")[1].split(">")[0].split(":")[2]
+        sIdx = message.index(emoji, startIndex)
+        eIdx = sIdx + len(emoji)
+        return (sIdx, eIdx)
+
+    def next_emoji_map(self, message: str, startIndex: int) -> Tuple[str, str]:
+        """
+        Returns start and end index of the nearest emoji ID
+        Raises IndexError if invalid tag.
+        """
+        if startIndex != 0:
+            startIndex += 1
+        emoji_list = message[startIndex:].split("<")[1].split(">")[0]
+        emoji = emoji_list.split(":")[2]
+        sIdx = message.index(emoji, startIndex)
+        eIdx = sIdx + len(emoji)
+        emojiId = message[sIdx:eIdx]
+        original = "<:" + emoji_list.split(":")[1] + ":" + emojiId + ">"
+        return (original, emojiId)
+
+    def get_all_emoji_urls(self, msg: str) -> List[str]:
+        msg = msg.replace(" ", "").replace("\r", "\n").replace("\n", "")
+
+        emoji = []
+
+        for i in range(0, len(msg)):
+            try:
+                idx = self.next_emoji(msg, i)
+                emoji_id = msg[idx[0]:idx[1]]
+                if emoji_id in emoji:
+                    continue
+                emoji.append(emoji_id)
+            except IndexError:
+                pass
+
+        return emoji
+
+    def get_emoji_id_to_url_map(self, msg: str) -> Dict[str, str]:
+        msg = msg.replace(" ", "").replace("\r", "\n").replace("\n", "")
+
+        emoji = {}
+
+        for i in range(0, len(msg)):
+            try:
+                emoji_string, emoji_id = self.next_emoji_map(msg, i)
+                if emoji_string in list(emoji.keys()):
+                    continue
+                emoji_url = self.parse_emoji(emoji_id)
+                emoji[emoji_string] = emoji_url
+            except IndexError:
+                pass
+
+        return emoji
+
+    def url_map_to_html_map(self, url_map: Dict[str, str], width: int | str = 96, height: int | str = 96) -> Dict[str, str]:
+        return {k: f"<img src=\"{v}\" width=\"{width}\" height=\"{height}\" />" for k, v in url_map.items()}
+
+    def download_all(self, emoji_urls: List[str], path: str):
+        for e in emoji_urls:
+            url = self.parse_emoji(e)
+            res = requests.get(url)
+            with open(f"{path}/{e}.webp", "wb") as f:
+                f.write(res.content)
+
+
+
+    def populate(self, message: str) -> str:
+        id_to_url = self.get_emoji_id_to_url_map(message)
+
+        id_to_img = self.url_map_to_html_map(id_to_url, 24, 24)
+
+        for k, v in id_to_img.items():
+            message = message.replace(k, v)
+
+        return message
     
     def escape_html(self, text):
         """
@@ -32,6 +120,7 @@ class Transcripts(commands.Cog):
         text = text.replace('__', '<br>')
         text = text.replace(r'\> ', '<br>')
         text = text.replace('```', '')
+        text = self.populate(text)
         return text
 
 
@@ -103,14 +192,20 @@ class Transcripts(commands.Cog):
                 pfp = message.author.display_avatar
                 color = message.author.color
                 messages.append((pfp, color, message.author.name, content, attachments))
-                
-                # Write messages to HTML file in reverse order
+                    
+            # Write messages to HTML file in reverse order
             for msg in reversed(messages):
                 pfp, color, author_name, content, attachments = msg
-                file.write(f'<div><img src="{pfp}" style="max-width: 40px; max-height: 40px; border-radius: 50%;"> <strong><a style="color: {color}">{author_name}</a>:</strong> {content}</div>')
-                file.write(f'<div>{attachments}</div>')
+                # Add a container div and use CSS to center-align text relative to the image
+                file.write('<div style="display: flex; align-items: center;">')
+                file.write(f'<img src="{pfp}" style="max-width: 40px; max-height: 40px; border-radius: 50%;">')
+                file.write(f'<div style="margin-left: 10px;">')
+                file.write(f'<strong><a style="color: {color}">{author_name}</a>:</strong> {content}')
+                file.write(f'{attachments}')
+                file.write('</div></div>')
                     
         await self.removeHTML(ctx.author) # type: ignore
+
     
     
     @commands.hybrid_command(
