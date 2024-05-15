@@ -233,7 +233,8 @@ class Transcripts(commands.Cog):
             for msg in reversed(messages):
                 pfp, color, author_name, content, attachments = msg
                 file.write(f'<div><img src="{pfp}" style="max-width: 40px; max-height: 40px; border-radius: 50%;"> <strong><a style="color: {color}">{author_name}</a>:</strong> {content}</div>')
-                file.write(f'<div>{attachments}</div>')
+                if attachments:
+                    file.write(f'<div>{attachments}</div>')
 
         await self.removeHTML(ctx.author) # type: ignore
         
