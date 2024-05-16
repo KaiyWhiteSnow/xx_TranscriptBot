@@ -16,8 +16,10 @@ class Transcripts(commands.Cog):
 
     def next_emoji(self,message: str, startIndex: int) -> Tuple[int, int]:
         """
-        Returns start and end index of the nearest emoji ID
-        Raises IndexError if invalid tag.
+        Returns:
+            - start and end index of the nearest emoji ID
+        Raises: 
+            - IndexError if invalid tag.
         """
         if startIndex != 0:
             startIndex += 1
@@ -28,8 +30,10 @@ class Transcripts(commands.Cog):
 
     def next_emoji_map(self, message: str, startIndex: int) -> Tuple[str, str]:
         """
-        Returns start and end index of the nearest emoji ID
-        Raises IndexError if invalid tag.
+        Returns:
+            - start and end index of the nearest emoji ID
+        Raises:
+            - IndexError if invalid tag.
         """
         if startIndex != 0:
             startIndex += 1
@@ -179,6 +183,20 @@ class Transcripts(commands.Cog):
         description="creates transcript for a channel",
     )
     async def transcriptchannel(self, ctx: commands.Context, channel: discord.TextChannel):
+        """
+        Creates transcript for a given channel.
+
+        Args:
+            ctx (commands.Context): The context of the command.
+            channel (discord.TextChannel): The channel for which to create transcripts.
+
+        Returns:
+            None
+
+        Examples:
+            # Create transcripts for a channel
+            /transcriptChannel #general
+        """
         with open(os.path.join(self.out_dir, f"{channel.name}.html"), "w", encoding="utf-8") as file:
             file.write(
                 await createHeader(channel.name)
@@ -214,6 +232,20 @@ class Transcripts(commands.Cog):
         description="creates transcript for a channel",
     ) 
     async def transcriptthread(self, ctx: commands.Context, thread: discord.Thread):
+        """
+        Creates transcript for a given channel.
+
+        Args:
+            ctx (commands.Context): The context of the command.
+            channel (discord.TextChannel): The channel for which to create transcripts.
+
+        Returns:
+            None
+
+        Examples:
+            # Create transcripts for a channel
+            /transcriptChannel #general
+        """
         with open(os.path.join(self.out_dir, f"{thread.name}.html"), "w", encoding="utf-8") as file:
             # Creating head tag
             file.write(
@@ -264,9 +296,7 @@ class Transcripts(commands.Cog):
         async for thread in threads:
             with open(os.path.join(self.out_dir, f"{thread.name}.html"), "w", encoding="utf-8") as file:
                 # Creating head tag
-                file.write(
-                    await createHeader(thread.name)
-                )
+                file.write(await createHeader(thread.name))
                 messages = []
                 # Thread ID and Name
                 file.write(f"Thread ID: {thread.id}, Name: {thread.name}")
@@ -280,8 +310,21 @@ class Transcripts(commands.Cog):
                 # Write messages to HTML file in reverse order
                 for msg in reversed(messages):
                     pfp, color, author_name, content, attachments = msg
-                    file.write(f'<div><img src="{pfp}" style="max-width: 40px; max-height: 40px; border-radius: 50%;"> <strong><a style="color: {color}">{author_name}</a>:</strong> {content}</div>')
-                    file.write(f'<div>{attachments}</div>')
+                    file.write(
+                            f'''
+                                <div>
+                                    <img src="{pfp}" style="max-width: 40px; max-height: 40px; border-radius: 50%;"> 
+                                    <strong>
+                                        <a style="color: {color}">
+                                            {author_name}
+                                        </a>:
+                                    </strong> 
+                                    {content}
+                                </div>
+                                '''
+                            )
+                    if attachments:
+                        file.write(f'<div>{attachments}</div>')
 
         await self.removeHTML(ctx.author) # type: ignore
         
